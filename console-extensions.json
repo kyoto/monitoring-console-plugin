@@ -3,18 +3,36 @@
     "type": "console.page/route",
     "properties": {
       "exact": true,
-      "path": "/example",
-      "component": { "$codeRef": "ExamplePage" }
+      "path": "/monitoring/new/query-browser",
+      "component": { "$codeRef": "QueryBrowserPage" }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "properties": {
+      "exact": true,
+      "path": "/monitoring/new/dashboards",
+      "component": { "$codeRef": "DashboardsPage" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "example",
-      "name": "Plugin Example",
-      "href": "/example",
+      "id": "query-browser",
+      "name": "🔌 Metrics",
+      "href": "/monitoring/new/query-browser",
       "perspective": "admin",
-      "section": "home"
+      "section": "observe"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "dashboards",
+      "name": "🔌 Dashboards",
+      "href": "/monitoring/new/dashboards",
+      "perspective": "admin",
+      "section": "observe"
     }
   }
 ]
