@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next';
 
 import './_promql-expression-input.scss';
 
+import { PROMETHEUS_BASE_PATH } from './utils';
 import CloseButton from './console/console-shared/close-button/CloseButton';
 import { useSafeFetch } from './console/utils/safe-fetch-hook';
 
@@ -55,8 +56,6 @@ interface PromQLExpressionInputProps {
   onExecuteQuery?: () => void;
   onSelectionChange?: (target: InteractionTarget, start: number, end: number) => void;
 }
-
-const PROMETHEUS_BASE_PATH = window.SERVER_FLAGS.prometheusBaseURL;
 
 const promqlExtension = new PromQLExtension();
 

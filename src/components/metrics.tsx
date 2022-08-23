@@ -63,6 +63,7 @@ import IntervalDropdown from './poll-interval-dropdown';
 import { colors, Error, QueryBrowser } from './query-browser';
 import TablePagination from './table-pagination';
 import { PrometheusAPIError, RootState } from './types';
+import { PROMETHEUS_BASE_PATH } from './utils';
 
 import { withFallback } from './console/console-shared/error/error-boundary';
 import { getPrometheusURL } from './console/graphs/helpers';
@@ -73,8 +74,6 @@ import { getURLSearchParams } from './console/utils/link';
 import { setAllQueryArguments } from './console/utils/router';
 import { useSafeFetch } from './console/utils/safe-fetch-hook';
 import { LoadingInline } from './console/utils/status-box';
-
-const PROMETHEUS_BASE_PATH = window.SERVER_FLAGS.prometheusBaseURL;
 
 // Stores information about the currently focused query input
 let focusedQuery;
