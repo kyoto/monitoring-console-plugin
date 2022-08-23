@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { Map as ImmutableMap } from 'immutable';
-import { Board, MONITORING_DASHBOARDS_VARIABLE_ALL_OPTION_KEY } from './types';
 
+import { Board, MONITORING_DASHBOARDS_VARIABLE_ALL_OPTION_KEY } from './types';
 import { getQueryArgument } from '../console/utils/router';
 
 export const DEFAULT_GRAPH_SAMPLES = 60;

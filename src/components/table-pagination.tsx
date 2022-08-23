@@ -2,16 +2,16 @@ import { Pagination, PaginationVariant, PerPageOptions } from '@patternfly/react
 import * as React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 
-const defaultPaginationOptions: PerPageOptions[] = [10, 20, 50, 100, 200, 500].map((n) => ({
+const defaultPerPageOptions: PerPageOptions[] = [10, 20, 50, 100, 200, 500].map((n) => ({
   title: n.toString(),
   value: n,
 }));
 
 const LocalizedToggleTemplate: React.FC<LocalizedToggleTemplateProps> = ({
   firstIndex,
-  lastIndex,
   itemCount,
   itemsTitle,
+  lastIndex,
 }) => {
   const { t } = useTranslation();
   return (
@@ -28,7 +28,7 @@ const TablePagination: React.FC<TablePaginationProps> = ({
   itemCount,
   page,
   perPage,
-  perPageOptions = defaultPaginationOptions,
+  perPageOptions = defaultPerPageOptions,
   setPage,
   setPerPage,
 }) => {
@@ -69,19 +69,19 @@ const TablePagination: React.FC<TablePaginationProps> = ({
 };
 
 type LocalizedToggleTemplateProps = {
-  firstIndex: number,
-  lastIndex: number,
-  itemCount: number,
-  itemsTitle: string,
+  firstIndex: number;
+  itemCount: number;
+  itemsTitle: string;
+  lastIndex: number;
 };
 
 type TablePaginationProps = {
-  itemCount: number,
-  page: number,
-  perPage: number,
-  perPageOptions?: PerPageOptions[],
-  setPage: (number) => void,
-  setPerPage: (number) => void,
+  itemCount: number;
+  page: number;
+  perPage: number;
+  perPageOptions?: PerPageOptions[];
+  setPage: (number) => void;
+  setPerPage: (number) => void;
 };
 
 export default TablePagination;

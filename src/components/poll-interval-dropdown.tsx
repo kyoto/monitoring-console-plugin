@@ -3,9 +3,9 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 
-import { formatPrometheusDuration, parsePrometheusDuration } from './console/utils/datetime';
-
 import { useBoolean } from './hooks/useBoolean';
+
+import { formatPrometheusDuration, parsePrometheusDuration } from './console/utils/datetime';
 
 const OFF_KEY = 'OFF_KEY';
 

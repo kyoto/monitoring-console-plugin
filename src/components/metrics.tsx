@@ -60,7 +60,7 @@ import {
 } from '../actions/observe';
 import { useBoolean } from './hooks/useBoolean';
 import IntervalDropdown from './poll-interval-dropdown';
-import { colors, Error as QueryBrowserError, QueryBrowser } from './query-browser';
+import { colors, Error, QueryBrowser } from './query-browser';
 import TablePagination from './table-pagination';
 import { PrometheusAPIError, RootState } from './types';
 
@@ -100,7 +100,11 @@ const MetricsActionsMenu: React.FC<{}> = () => {
     <DropdownItem key="add-query" component="button" onClick={addQuery}>
       {t('public~Add query')}
     </DropdownItem>,
-    <DropdownItem key="collapse-all" component="button" onClick={() => dispatch(queryBrowserSetAllExpanded(!isAllExpanded))}>
+    <DropdownItem
+      key="collapse-all"
+      component="button"
+      onClick={() => dispatch(queryBrowserSetAllExpanded(!isAllExpanded))}
+    >
       {isAllExpanded ? t('public~Collapse all query tables') : t('public~Expand all query tables')}
     </DropdownItem>,
     <DropdownItem key="delete-all" component="button" onClick={doDelete}>
@@ -110,6 +114,7 @@ const MetricsActionsMenu: React.FC<{}> = () => {
 
   return (
     <PFDropdown
+      className="co-actions-menu"
       dropdownItems={dropdownItems}
       isOpen={isOpen}
       onSelect={setClosed}
@@ -175,29 +180,30 @@ const MetricsDropdown: React.FC<{}> = () => {
     if (target) {
       target.focus();
 
-      // Restore cursor position / currently selected text (use _.defer() to delay until after the input value is set)
+      // Restore cursor position / currently selected text (use _.defer() to delay until after the
+      // input value is set)
       _.defer(() => target.setSelectionRange(selection.start, selection.start + metric.length));
     }
   };
 
-  let title: React.ReactElement = t('public~Insert metric at cursor');
+  let title: React.ReactElement = <>{t('public~Insert metric at cursor')}</>;
   if (error !== undefined) {
     const message =
       error?.response?.status === 403
         ? t('public~Access restricted.')
         : t('public~Failed to load metrics list.');
     title = (
-      <span>
+      <>
         <RedExclamationCircleIcon /> {message}
-      </span>
+      </>
     );
   } else if (items === undefined) {
     title = <LoadingInline />;
   } else if (_.isEmpty(items)) {
     title = (
-      <span>
+      <>
         <YellowExclamationTriangleIcon /> {t('public~No metrics found.')}
-      </span>
+      </>
     );
   }
 
@@ -344,6 +350,7 @@ const QueryKebab: React.FC<{ index: number }> = ({ index }) => {
 
   return (
     <PFDropdown
+      data-test-id="kebab-button"
       dropdownItems={dropdownItems}
       isOpen={isOpen}
       isPlain
@@ -418,7 +425,7 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
   if (error) {
     return (
       <div className="query-browser__table-message">
-        <QueryBrowserError error={error} title={t('public~Error loading values')} />
+        <Error error={error} title={t('public~Error loading values')} />
       </div>
     );
   }
@@ -661,8 +668,8 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
   }, [dispatch]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
-  // Use React.useMemo() to prevent these two arrays being recreated on every render, which would trigger unnecessary
-  // re-renders of QueryBrowser, which can be quite slow
+  // Use React.useMemo() to prevent these two arrays being recreated on every render, which would
+  // trigger unnecessary re-renders of QueryBrowser, which can be quite slow
   const queriesMemoKey = JSON.stringify(_.map(queries, 'query'));
   const queryStrings = React.useMemo(() => _.map(queries, 'query'), [queriesMemoKey]);
   const disabledSeriesMemoKey = JSON.stringify(

@@ -11,12 +11,7 @@ import {
   SilenceStates,
 } from '@openshift-console/dynamic-plugin-sdk';
 
-import {
-  AlertSource,
-  MonitoringResource,
-  PrometheusRulesResponse,
-  Target,
-} from './types';
+import { AlertSource, MonitoringResource, PrometheusRulesResponse, Target } from './types';
 
 export const AlertResource: MonitoringResource = {
   kind: 'Alert',

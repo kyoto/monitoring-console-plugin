@@ -48,13 +48,13 @@ type Group = {
 };
 
 export type PrometheusAPIError = {
-  response: {
-    status: number;
-  };
   json: {
     error?: string;
   };
   message?: string;
+  response: {
+    status: number;
+  };
 };
 
 export type PrometheusRulesResponse = {
