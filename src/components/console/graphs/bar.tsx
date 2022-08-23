@@ -163,7 +163,7 @@ export const Bar: React.FC<BarProps> = ({
   );
 };
 
-type LabelComponentProps = {
+export type LabelComponentProps = {
   title: Date | string | number;
   metric?: { [key: string]: string };
 };
@@ -183,6 +183,6 @@ type BarProps = {
   delay?: number;
   humanize?: Humanize;
   LabelComponent?: React.ComponentType<LabelComponentProps>;
-  metric: string;
+  metric?: string;
   query: string;
 };
