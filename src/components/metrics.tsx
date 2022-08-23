@@ -70,7 +70,6 @@ import { getPrometheusURL } from './console/graphs/helpers';
 import { AsyncComponent } from './console/utils/async';
 import { usePoll } from './console/utils/poll-hook';
 import { Dropdown } from './console/utils/dropdown';
-import { getURLSearchParams } from './console/utils/link';
 import { setAllQueryArguments } from './console/utils/router';
 import { useSafeFetch } from './console/utils/safe-fetch-hook';
 import { LoadingInline } from './console/utils/status-box';
@@ -652,9 +651,9 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
 
   // Initialize queries from URL parameters
   React.useEffect(() => {
-    const searchParams = getURLSearchParams();
-    for (let i = 0; _.has(searchParams, `query${i}`); ++i) {
-      const query = searchParams[`query${i}`];
+    const searchParams = new URLSearchParams(window.location.search);
+    for (let i = 0; searchParams.has(`query${i}`); ++i) {
+      const query = searchParams.get(`query${i}`);
       dispatch(
         queryBrowserPatchQuery(i, {
           isEnabled: true,
