@@ -341,7 +341,7 @@ const QueryKebab: React.FC<{ index: number }> = ({ index }) => {
     <DropdownItem key="delete" component="button" onClick={doDelete}>
       {t('public~Delete query')}
     </DropdownItem>,
-    <DropdownItem key="duplicate" component="button" onClick={doClone }>
+    <DropdownItem key="duplicate" component="button" onClick={doClone}>
       {t('public~Duplicate query')}
     </DropdownItem>,
   ];
@@ -808,7 +808,9 @@ const QueryBrowserPage_: React.FC<{}> = () => {
       <div className="co-m-pane__body">
         <div className="row">
           <div className="col-xs-12">
-            <ToggleGraph />
+            <div className="query-browser__toggle-graph-container">
+              <ToggleGraph />
+            </div>
           </div>
         </div>
         <div className="row">
