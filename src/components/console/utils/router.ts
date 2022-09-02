@@ -1,40 +1,21 @@
 import * as _ from 'lodash-es';
-import { createBrowserHistory, createMemoryHistory, History } from 'history';
+import { createBrowserHistory, History } from 'history';
 
-type AppHistory = History & { pushPath: History['push'] };
-
-let createHistory;
-
-try {
-  if (process.env.NODE_ENV === 'test') {
-    // Running in node. Can't use browser history
-    createHistory = createMemoryHistory;
-  } else {
-    createHistory = createBrowserHistory;
-  }
-} catch (unused) {
-  createHistory = createBrowserHistory;
-}
-
-export const history: AppHistory = createHistory({ basename: window.SERVER_FLAGS.basePath });
-
-const removeBasePath = (url = '/') =>
-  _.startsWith(url, window.SERVER_FLAGS.basePath)
-    ? url.slice(window.SERVER_FLAGS.basePath.length - 1)
-    : url;
-
-// Monkey patch history to slice off the base path
-(history as any).__replace__ = history.replace;
-// @ts-ignore TODO
-history.replace = (url) => (history as any).__replace__(removeBasePath(url));
-
-(history as any).__push__ = history.push;
-// @ts-ignore TODO
-history.push = (url) => (history as any).__push__(removeBasePath(url));
-(history as any).pushPath = (path) => (history as any).__push__(path);
+const history: History = createBrowserHistory();
 
 export const getQueryArgument = (arg: string) =>
   new URLSearchParams(window.location.search).get(arg);
+
+export const getAllQueryArguments = () => {
+  const all: { [key: string]: string } = {};
+  const params = new URLSearchParams(window.location.search);
+
+  for (const [k, v] of params.entries()) {
+    all[k] = v;
+  }
+
+  return all;
+};
 
 export const setQueryArgument = (k: string, v: string) => {
   const params = new URLSearchParams(window.location.search);

@@ -25,7 +25,7 @@ const barTheme = {
   bar: {
     style: {
       labels: {
-        textAnchor: 'end' as 'end',
+        textAnchor: 'end' as const,
       },
     },
   },
@@ -45,7 +45,7 @@ const barTheme = {
         stroke: 'none',
       },
       tickLabels: {
-        textAnchor: 'start' as 'start',
+        textAnchor: 'start' as const,
       },
     },
   },
@@ -59,7 +59,6 @@ const BarChart: React.FC<BarChartProps> = ({
   data = [],
   LabelComponent,
   loading = false,
-  query,
 }) => {
   const [containerRef, width] = useRefWidth();
 

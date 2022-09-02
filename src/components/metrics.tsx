@@ -4,13 +4,12 @@ import {
   PrometheusData,
   PrometheusEndpoint,
   PrometheusLabels,
-  RedExclamationCircleIcon,
   YellowExclamationTriangleIcon,
 } from '@openshift-console/dynamic-plugin-sdk';
 import {
   ActionGroup,
   Button,
-  Dropdown as PFDropdown,
+  Dropdown,
   DropdownItem,
   DropdownPosition,
   DropdownToggle,
@@ -18,7 +17,6 @@ import {
   EmptyStateBody,
   EmptyStateIcon,
   EmptyStateVariant,
-  KebabToggle,
   Switch,
   Title,
 } from '@patternfly/react-core';
@@ -48,31 +46,30 @@ import {
   queryBrowserDuplicateQuery,
   queryBrowserDeleteAllQueries,
   queryBrowserDeleteQuery,
-  queryBrowserInsertText,
   queryBrowserPatchQuery,
   queryBrowserRunQueries,
   queryBrowserSetAllExpanded,
-  queryBrowserSetMetrics,
   queryBrowserSetPollInterval,
+  queryBrowserToggleAllSeries,
   queryBrowserToggleIsEnabled,
   queryBrowserToggleSeries,
   toggleGraphs,
 } from '../actions/observe';
-import { useBoolean } from './hooks/useBoolean';
-import IntervalDropdown from './poll-interval-dropdown';
-import { colors, Error, QueryBrowser } from './query-browser';
-import TablePagination from './table-pagination';
-import { PrometheusAPIError, RootState } from './types';
-import { PROMETHEUS_BASE_PATH } from './utils';
 
 import { withFallback } from './console/console-shared/error/error-boundary';
 import { getPrometheusURL } from './console/graphs/helpers';
 import { AsyncComponent } from './console/utils/async';
 import { usePoll } from './console/utils/poll-hook';
-import { Dropdown } from './console/utils/dropdown';
-import { setAllQueryArguments } from './console/utils/router';
+import { getAllQueryArguments, setAllQueryArguments } from './console/utils/router';
 import { useSafeFetch } from './console/utils/safe-fetch-hook';
 import { LoadingInline } from './console/utils/status-box';
+
+import { useBoolean } from './hooks/useBoolean';
+import KebabDropdown from './kebab-dropdown';
+import IntervalDropdown from './poll-interval-dropdown';
+import { colors, Error, QueryBrowser } from './query-browser';
+import TablePagination from './table-pagination';
+import { PrometheusAPIError, RootState } from './types';
 
 // Stores information about the currently focused query input
 let focusedQuery;
@@ -111,7 +108,7 @@ const MetricsActionsMenu: React.FC<{}> = () => {
   ];
 
   return (
-    <PFDropdown
+    <Dropdown
       className="co-actions-menu"
       dropdownItems={dropdownItems}
       isOpen={isOpen}
@@ -141,80 +138,6 @@ export const ToggleGraph: React.FC<{}> = () => {
     >
       {icon} {hideGraphs ? t('public~Show graph') : t('public~Hide graph')}
     </Button>
-  );
-};
-
-const metricsFilter = (a: string, b: string): boolean => b.includes(a);
-
-const MetricsDropdown: React.FC<{}> = () => {
-  const { t } = useTranslation();
-
-  const dispatch = useDispatch();
-
-  const [items, setItems] = React.useState<MetricsDropdownItems>();
-  const [error, setError] = React.useState<PrometheusAPIError>();
-
-  const safeFetch = React.useCallback(useSafeFetch(), []);
-
-  React.useEffect(() => {
-    safeFetch(`${PROMETHEUS_BASE_PATH}/${PrometheusEndpoint.LABEL}/__name__/values`)
-      .then((response) => {
-        const metrics = response?.data;
-        setItems(_.zipObject(metrics, metrics));
-        dispatch(queryBrowserSetMetrics(metrics));
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setError(err);
-        }
-      });
-  }, [dispatch, safeFetch]);
-
-  const onChange = (metric: string) => {
-    // Replace the currently selected text with the metric
-    const { index = 0, selection = {}, target = undefined } = focusedQuery || {};
-    dispatch(queryBrowserInsertText(index, metric, selection.start, selection.end));
-
-    if (target) {
-      target.focus();
-
-      // Restore cursor position / currently selected text (use _.defer() to delay until after the
-      // input value is set)
-      _.defer(() => target.setSelectionRange(selection.start, selection.start + metric.length));
-    }
-  };
-
-  let title: React.ReactElement = <>{t('public~Insert metric at cursor')}</>;
-  if (error !== undefined) {
-    const message =
-      error?.response?.status === 403
-        ? t('public~Access restricted.')
-        : t('public~Failed to load metrics list.');
-    title = (
-      <>
-        <RedExclamationCircleIcon /> {message}
-      </>
-    );
-  } else if (items === undefined) {
-    title = <LoadingInline />;
-  } else if (_.isEmpty(items)) {
-    title = (
-      <>
-        <YellowExclamationTriangleIcon /> {t('public~No metrics found.')}
-      </>
-    );
-  }
-
-  return (
-    <Dropdown
-      autocompleteFilter={metricsFilter}
-      disabled={error !== undefined}
-      id="metrics-dropdown"
-      items={items || {}}
-      menuClassName="query-browser__metrics-dropdown-menu query-browser__metrics-dropdown-menu--insert"
-      onChange={onChange}
-      title={title}
-    />
   );
 };
 
@@ -262,11 +185,10 @@ const SeriesButton: React.FC<SeriesButtonProps> = ({ index, labels }) => {
   });
 
   const dispatch = useDispatch();
-  const toggleSeries = React.useCallback(() => dispatch(queryBrowserToggleSeries(index, labels)), [
-    dispatch,
-    index,
-    labels,
-  ]);
+  const toggleSeries = React.useCallback(
+    () => dispatch(queryBrowserToggleSeries(index, labels)),
+    [dispatch, index, labels],
+  );
 
   if (isSeriesEmpty) {
     return <div className="query-browser__series-btn-wrap"></div>;
@@ -293,33 +215,23 @@ const SeriesButton: React.FC<SeriesButtonProps> = ({ index, labels }) => {
 const QueryKebab: React.FC<{ index: number }> = ({ index }) => {
   const { t } = useTranslation();
 
-  const [isOpen, setIsOpen, , setClosed] = useBoolean(false);
-
   const isDisabledSeriesEmpty = useSelector(({ observe }: RootState) =>
     _.isEmpty(observe.getIn(['queryBrowser', 'queries', index, 'disabledSeries'])),
   );
   const isEnabled = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser', 'queries', index, 'isEnabled']),
   );
-  const series = useSelector(({ observe }: RootState) =>
-    observe.getIn(['queryBrowser', 'queries', index, 'series']),
-  );
 
   const dispatch = useDispatch();
 
-  const toggleIsEnabled = React.useCallback(() => dispatch(queryBrowserToggleIsEnabled(index)), [
-    dispatch,
-    index,
-  ]);
+  const toggleIsEnabled = React.useCallback(
+    () => dispatch(queryBrowserToggleIsEnabled(index)),
+    [dispatch, index],
+  );
 
   const toggleAllSeries = React.useCallback(
-    () =>
-      dispatch(
-        queryBrowserPatchQuery(index, {
-          disabledSeries: isDisabledSeriesEmpty ? series : [],
-        }),
-      ),
-    [dispatch, index, isDisabledSeriesEmpty, series],
+    () => dispatch(queryBrowserToggleAllSeries(index)),
+    [dispatch, index],
   );
 
   const doDelete = React.useCallback(() => {
@@ -346,17 +258,7 @@ const QueryKebab: React.FC<{ index: number }> = ({ index }) => {
     </DropdownItem>,
   ];
 
-  return (
-    <PFDropdown
-      data-test-id="kebab-button"
-      dropdownItems={dropdownItems}
-      isOpen={isOpen}
-      isPlain
-      onSelect={setClosed}
-      position={DropdownPosition.right}
-      toggle={<KebabToggle id="toggle-kebab" onToggle={setIsOpen} />}
-    />
-  );
+  return <KebabDropdown dropdownItems={dropdownItems} />;
 };
 
 export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
@@ -387,6 +289,17 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
 
   const lastRequestTime = useSelector(({ observe }: RootState) =>
     observe.getIn(['queryBrowser', 'lastRequestTime']),
+  );
+
+  const dispatch = useDispatch();
+
+  const toggleAllSeries = React.useCallback(
+    () => dispatch(queryBrowserToggleAllSeries(index)),
+    [dispatch, index],
+  );
+
+  const isDisabledSeriesEmpty = useSelector(({ observe }: RootState) =>
+    _.isEmpty(observe.getIn(['queryBrowser', 'queries', index, 'disabledSeries'])),
   );
 
   const safeFetch = React.useCallback(useSafeFetch(), []);
@@ -523,6 +436,14 @@ export const QueryTable: React.FC<QueryTableProps> = ({ index, namespace }) => {
     <>
       <div className="query-browser__table-wrapper">
         <div className="horizontal-scroll">
+          <Button
+            variant="link"
+            isInline
+            onClick={toggleAllSeries}
+            className="query-browser__series-select-all-btn"
+          >
+            {isDisabledSeriesEmpty ? t('public~Unselect all') : t('public~Select all')}
+          </Button>
           <Table
             aria-label={t('public~query results table')}
             cells={columns}
@@ -573,10 +494,10 @@ const Query: React.FC<{ index: number }> = ({ index }) => {
 
   const dispatch = useDispatch();
 
-  const toggleIsEnabled = React.useCallback(() => dispatch(queryBrowserToggleIsEnabled(index)), [
-    dispatch,
-    index,
-  ]);
+  const toggleIsEnabled = React.useCallback(
+    () => dispatch(queryBrowserToggleIsEnabled(index)),
+    [dispatch, index],
+  );
 
   const toggleIsExpanded = React.useCallback(
     () => dispatch(queryBrowserPatchQuery(index, { isExpanded: !isExpanded })),
@@ -651,9 +572,9 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
 
   // Initialize queries from URL parameters
   React.useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    for (let i = 0; searchParams.has(`query${i}`); ++i) {
-      const query = searchParams.get(`query${i}`);
+    const searchParams = getAllQueryArguments();
+    for (let i = 0; _.has(searchParams, `query${i}`); ++i) {
+      const query = searchParams[`query${i}`];
       dispatch(
         queryBrowserPatchQuery(i, {
           isEnabled: true,
@@ -673,9 +594,10 @@ const QueryBrowserWrapper: React.FC<{}> = () => {
   const disabledSeriesMemoKey = JSON.stringify(
     _.reject(_.map(queries, 'disabledSeries'), _.isEmpty),
   );
-  const disabledSeries = React.useMemo(() => _.map(queries, 'disabledSeries'), [
-    disabledSeriesMemoKey,
-  ]);
+  const disabledSeries = React.useMemo(
+    () => _.map(queries, 'disabledSeries'),
+    [disabledSeriesMemoKey],
+  );
   /* eslint-enable react-hooks/exhaustive-deps */
 
   // Update the URL parameters when the queries shown in the graph change
@@ -763,9 +685,10 @@ const QueriesList: React.FC<{}> = () => {
 
   return (
     <>
-      {_.range(count).map((i) => (
-        <Query index={i} key={i} />
-      ))}
+      {_.range(count).map((index) => {
+        const reversedIndex = count - index - 1;
+        return <Query index={reversedIndex} key={reversedIndex} />;
+      })}
     </>
   );
 };
@@ -776,9 +699,10 @@ const PollIntervalDropdown = () => {
   );
 
   const dispatch = useDispatch();
-  const setInterval = React.useCallback((v: number) => dispatch(queryBrowserSetPollInterval(v)), [
-    dispatch,
-  ]);
+  const setInterval = React.useCallback(
+    (v: number) => dispatch(queryBrowserSetPollInterval(v)),
+    [dispatch],
+  );
 
   return <IntervalDropdown interval={interval} setInterval={setInterval} />;
 };
@@ -817,9 +741,6 @@ const QueryBrowserPage_: React.FC<{}> = () => {
           <div className="col-xs-12">
             <QueryBrowserWrapper />
             <div className="query-browser__controls">
-              <div className="query-browser__controls--left">
-                <MetricsDropdown />
-              </div>
               <div className="query-browser__controls--right">
                 <ActionGroup className="pf-c-form pf-c-form__group--no-top-margin">
                   <AddQueryButton />
@@ -836,10 +757,6 @@ const QueryBrowserPage_: React.FC<{}> = () => {
 };
 export const QueryBrowserPage = withFallback(QueryBrowserPage_);
 
-type MetricsDropdownItems = {
-  [key: string]: string;
-};
-
 type QueryTableProps = {
   index: number;
   namespace?: string;
@@ -849,5 +766,3 @@ type SeriesButtonProps = {
   index: number;
   labels: PrometheusLabels;
 };
-
-export default QueryBrowserPage;

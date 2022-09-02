@@ -2,25 +2,27 @@
   {
     "type": "console.page/route",
     "properties": {
-      "exact": true,
-      "path": "/monitoring/new/query-browser",
-      "component": { "$codeRef": "QueryBrowserPage" }
-    }
-  },
-  {
-    "type": "console.page/route",
-    "properties": {
-      "exact": true,
-      "path": "/monitoring/new/dashboards",
-      "component": { "$codeRef": "DashboardsPage" }
+      "exact": false,
+      "path": "/monitoring/",
+      "component": { "$codeRef": "MonitoringUI" }
     }
   },
   {
     "type": "console.navigation/href",
     "properties": {
-      "id": "query-browser",
-      "name": "🔌 Metrics",
-      "href": "/monitoring/new/query-browser",
+      "id": "alerting",
+      "name": "Alerting",
+      "href": "/monitoring/alerts",
+      "perspective": "admin",
+      "section": "observe"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "metrics",
+      "name": "Metrics",
+      "href": "/monitoring/query-browser",
       "perspective": "admin",
       "section": "observe"
     }
@@ -29,8 +31,18 @@
     "type": "console.navigation/href",
     "properties": {
       "id": "dashboards",
-      "name": "🔌 Dashboards",
-      "href": "/monitoring/new/dashboards",
+      "name": "Dashboards",
+      "href": "/monitoring/dashboards",
+      "perspective": "admin",
+      "section": "observe"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "properties": {
+      "id": "targets",
+      "name": "Targets",
+      "href": "/monitoring/targets",
       "perspective": "admin",
       "section": "observe"
     }

@@ -17,9 +17,15 @@ const LocalizedToggleTemplate: React.FC<LocalizedToggleTemplateProps> = ({
   return (
     <Trans t={t} ns="public">
       <b>
-        <>{{ firstIndex }} - {{ lastIndex }}</>
+        <>
+          {{ firstIndex }} - {{ lastIndex }}
+        </>
       </b>{' '}
-      of <b><>{{ itemCount }}</></b> {{ itemsTitle }}
+      of{' '}
+      <b>
+        <>{{ itemCount }}</>
+      </b>{' '}
+      {{ itemsTitle }}
     </Trans>
   );
 };

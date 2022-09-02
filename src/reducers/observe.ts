@@ -76,6 +76,13 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
     });
   }
 
+  const queryBrowserPatchQueryHelper = (index: number, patch: { [key: string]: unknown }) => {
+    const query = state.hasIn(['queryBrowser', 'queries', index])
+      ? ImmutableMap(patch)
+      : newQueryBrowserQuery().merge(patch);
+    return state.mergeIn(['queryBrowser', 'queries', index], query);
+  };
+
   switch (action.type) {
     case ActionType.DashboardsPatchVariable:
       return state.mergeIn(
@@ -201,22 +208,9 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
     case ActionType.QueryBrowserDismissNamespaceAlert:
       return state.setIn(['queryBrowser', 'dismissNamespaceAlert'], true);
 
-    case ActionType.QueryBrowserInsertText: {
-      const { index, newText, replaceFrom, replaceTo } = action.payload;
-      const oldText = state.getIn(['queryBrowser', 'queries', index, 'text'], '');
-      const text =
-        _.isInteger(replaceFrom) && _.isInteger(replaceTo)
-          ? oldText.substring(0, replaceFrom) + newText + oldText.substring(replaceTo)
-          : oldText + newText;
-      return state.setIn(['queryBrowser', 'queries', index, 'text'], text);
-    }
-
     case ActionType.QueryBrowserPatchQuery: {
       const { index, patch } = action.payload;
-      const query = state.hasIn(['queryBrowser', 'queries', index])
-        ? ImmutableMap(patch)
-        : newQueryBrowserQuery().merge(patch);
-      return state.mergeIn(['queryBrowser', 'queries', index], query);
+      return queryBrowserPatchQueryHelper(index, patch);
     }
 
     case ActionType.QueryBrowserRunQueries: {
@@ -247,6 +241,16 @@ export default (state: ObserveState, action: ObserveAction): ObserveState => {
 
     case ActionType.QueryBrowserSetTimespan:
       return state.setIn(['queryBrowser', 'timespan'], action.payload.timespan);
+
+    case ActionType.QueryBrowserToggleAllSeries: {
+      const index = action.payload.index;
+      const isDisabledSeriesEmpty = _.isEmpty(
+        state.getIn(['queryBrowser', 'queries', index, 'disabledSeries']),
+      );
+      const series = state.getIn(['queryBrowser', 'queries', index, 'series']);
+      const patch = { disabledSeries: isDisabledSeriesEmpty ? series : [] };
+      return queryBrowserPatchQueryHelper(index, patch);
+    }
 
     case ActionType.QueryBrowserToggleIsEnabled: {
       const query = state.getIn(['queryBrowser', 'queries', action.payload.index]);

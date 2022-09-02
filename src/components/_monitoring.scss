@@ -25,6 +25,17 @@
   margin-top: -15px;
 }
 
+.pf-c-modal-box {
+  .custom-time-range-modal {
+    overflow: visible;
+    padding: var(--pf-c-modal-box__body--PaddingTop) var(--pf-c-modal-box__body--PaddingLeft);
+  }
+
+  .custom-time-range-modal-footer {
+    padding-top: var(--pf-c-modal-box__body--PaddingTop);
+  }
+}
+
 .graph-empty-state {
   min-height: 310px;
   &__loaded {
@@ -77,6 +88,10 @@
     );
     right: 0;
   }
+}
+
+.monitoring-breadcrumbs {
+  padding-bottom: var(--pf-global--spacer--sm);
 }
 
 .monitoring-dashboards__card {
@@ -404,14 +419,6 @@ $monitoring-line-height: 18px;
   max-height: 25vh;
   overflow: auto;
   width: 100%;
-
-  &--insert {
-    @media (min-width: $screen-sm-min) {
-      max-width: 55vw;
-    }
-    max-width: 85vw;
-    width: 550px;
-  }
 }
 
 .query-browser__query {
@@ -469,13 +476,14 @@ $monitoring-line-height: 18px;
   }
 }
 
-.query-browser__span-dropdown-menu {
-  right: 1px;
-  width: 130px;
-}
+// Match the width of the combined text input and dropdown button input group and the dropdown menu
+.query-browser__span {
+  $width: 130px;
+  max-width: $width;
 
-.query-browser__span-text {
-  max-width: 79px;
+  .query-browser__span-dropdown-item {
+    width: $width - 1px;
+  }
 }
 
 .query-browser__table {
@@ -501,6 +509,10 @@ $monitoring-line-height: 18px;
   table {
     table-layout: auto;
   }
+}
+
+.query-browser__table-wrapper .query-browser__series-select-all-btn {
+  margin-top: var(--pf-global--spacer--md);
 }
 
 .query-browser__table-message {
@@ -598,6 +610,7 @@ $monitoring-line-height: 18px;
   &:focus {
     outline: none;
   }
+  height: 200px;
 }
 
 .query-browser__zoom-overlay {

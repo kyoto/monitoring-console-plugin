@@ -2,10 +2,10 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import { useTranslation } from 'react-i18next';
 
+import { useSafeFetch } from '../console/utils/safe-fetch-hook';
+
 import { useBoolean } from '../hooks/useBoolean';
 import { Board } from './types';
-
-import { useSafeFetch } from '../console/utils/safe-fetch-hook';
 
 export const useFetchDashboards = (namespace: string): [Board[], boolean, string] => {
   const { t } = useTranslation();

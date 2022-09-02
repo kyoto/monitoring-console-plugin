@@ -1,7 +1,13 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PrometheusEndpoint, PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
-import { PerPageOptions } from '@patternfly/react-core';
+import {
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateVariant,
+  PerPageOptions,
+} from '@patternfly/react-core';
 import {
   ISortBy,
   sortable,
@@ -12,17 +18,14 @@ import {
   TableVariant,
 } from '@patternfly/react-table';
 
-import { formatNumber } from '../format';
-import { ColumnStyle, Panel } from './types';
-import TablePagination from '../table-pagination';
-
-import { useTranslation } from 'react-i18next';
-
 import ErrorAlert from '../console/console-shared/alerts/error';
 import { getPrometheusURL } from '../console/graphs/helpers';
 import { usePoll } from '../console/utils/poll-hook';
 import { useSafeFetch } from '../console/utils/safe-fetch-hook';
-import { EmptyBox } from '../console/utils/status-box';
+
+import { formatNumber } from '../format';
+import { ColumnStyle, Panel } from './types';
+import TablePagination from '../table-pagination';
 
 type AugmentedColumnStyle = ColumnStyle & {
   className?: string;
@@ -124,7 +127,11 @@ const Table: React.FC<Props> = ({ panel, pollInterval, queries, namespace }) => 
     return <ErrorAlert message={t('public~panel.styles attribute not found')} />;
   }
   if (_.isEmpty(data)) {
-    return <EmptyBox label={t('public~Data')} />;
+    return (
+      <EmptyState variant={EmptyStateVariant.xs}>
+        <EmptyStateBody>{t('public~No data found')}</EmptyStateBody>
+      </EmptyState>
+    );
   }
 
   const columns: AugmentedColumnStyle[] = getColumns(panel.styles);

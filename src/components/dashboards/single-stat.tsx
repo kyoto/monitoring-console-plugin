@@ -3,14 +3,14 @@ import * as React from 'react';
 import { PrometheusEndpoint, PrometheusResponse } from '@openshift-console/dynamic-plugin-sdk';
 import { Bullseye } from '@patternfly/react-core';
 
-import { formatNumber } from '../format';
-import { Panel } from './types';
-
 import ErrorAlert from '../console/console-shared/alerts/error';
 import { getPrometheusURL } from '../console/graphs/helpers';
 import { usePoll } from '../console/utils/poll-hook';
 import { useSafeFetch } from '../console/utils/safe-fetch-hook';
 import { LoadingInline } from '../console/utils/status-box';
+
+import { formatNumber } from '../format';
+import { Panel } from './types';
 
 const colorMap = {
   'super-light-blue': 'blue-100',

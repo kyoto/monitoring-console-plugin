@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import * as _ from 'lodash-es';
 import {
+  Overview,
   PrometheusEndpoint,
   RedExclamationCircleIcon,
 } from '@openshift-console/dynamic-plugin-sdk';
@@ -22,7 +23,19 @@ import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Map as ImmutableMap } from 'immutable';
-import { Link } from 'react-router-dom';
+import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
+
+import { withFallback } from '../console/console-shared/error/error-boundary';
+import ErrorAlert from '../console/console-shared/alerts/error';
+import { getPrometheusURL } from '../console/graphs/helpers';
+import {
+  getQueryArgument,
+  removeQueryArgument,
+  setQueryArgument,
+  setQueryArguments,
+} from '../console/utils/router';
+import { useSafeFetch } from '../console/utils/safe-fetch-hook';
+import { LoadingInline } from '../console/utils/status-box';
 
 import {
   DashboardsClearVariables,
@@ -56,20 +69,6 @@ import {
   getActivePerspective,
   getAllVariables,
 } from './monitoring-dashboard-utils';
-
-import Dashboard from '../console/console-shared/dashboard/Dashboard';
-import ErrorAlert from '../console/console-shared/alerts/error';
-import { withFallback } from '../console/console-shared/error/error-boundary';
-import { getPrometheusURL } from '../console/graphs/helpers';
-import {
-  getQueryArgument,
-  history,
-  removeQueryArgument,
-  setQueryArgument,
-  setQueryArguments,
-} from '../console/utils/router';
-import { useSafeFetch } from '../console/utils/safe-fetch-hook';
-import { LoadingInline } from '../console/utils/status-box';
 
 const intervalVariableRegExps = ['__interval', '__rate_interval', '__auto_interval_[a-z]+'];
 
@@ -527,6 +526,13 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
     [panel],
   );
 
+  const handleZoom = React.useCallback((timeRange: number, endTime: number) => {
+    setQueryArguments({
+      endTime: endTime.toString(),
+      timeRange: timeRange.toString(),
+    });
+  }, []);
+
   if (panel.type === 'row') {
     return (
       <>
@@ -549,13 +555,6 @@ const Card: React.FC<CardProps> = React.memo(({ panel }) => {
   const isLoading = _.some(queries, _.isUndefined);
 
   const panelClassModifier = getPanelClassModifier(panel);
-
-  const handleZoom = React.useCallback((timeRange: number, endTime: number) => {
-    setQueryArguments({
-      endTime: endTime.toString(),
-      timeRange: timeRange.toString(),
-    });
-  }, []);
 
   return (
     <div
@@ -663,7 +662,9 @@ const Board: React.FC<BoardProps> = ({ rows }) => (
   </>
 );
 
-const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ match }) => {
+type MonitoringDashboardsPageProps = RouteComponentProps<{ board: string; ns?: string }>;
+
+const MonitoringDashboardsPage_: React.FC<MonitoringDashboardsPageProps> = ({ history, match }) => {
   const { t } = useTranslation();
 
   const dispatch = useDispatch();
@@ -808,11 +809,12 @@ const MonitoringDashboardsPage: React.FC<MonitoringDashboardsPageProps> = ({ mat
             {namespace && <TimeDropdowns />}
           </div>
         </div>
-        <Dashboard>{isLoading ? <LoadingInline /> : <Board key={board} rows={rows} />}</Dashboard>
+        <Overview>{isLoading ? <LoadingInline /> : <Board key={board} rows={rows} />}</Overview>
       </NamespaceContext.Provider>
     </>
   );
 };
+const MonitoringDashboardsPage = withRouter(MonitoringDashboardsPage_);
 
 type Variable = {
   isHidden?: boolean;
@@ -852,12 +854,6 @@ type BoardProps = {
 
 type CardProps = {
   panel: Panel;
-};
-
-type MonitoringDashboardsPageProps = {
-  match: {
-    params: { board: string; ns?: string };
-  };
 };
 
 export default withFallback(MonitoringDashboardsPage);

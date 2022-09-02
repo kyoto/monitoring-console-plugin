@@ -2,14 +2,11 @@ import {
   Alert,
   PrometheusLabels,
   PrometheusRule,
-  RowFilter,
   Rule,
   Silence,
 } from '@openshift-console/dynamic-plugin-sdk';
 
 import { ObserveState } from '../reducers/observe';
-
-import { RowFunctionArgs } from './console/factory/table';
 
 export const enum AlertSource {
   Platform = 'platform',
@@ -64,25 +61,6 @@ export type PrometheusRulesResponse = {
   status: string;
 };
 
-export type ListPageProps = {
-  CreateButton?: React.ComponentType<{}>;
-  data: Alert[] | Rule[] | Silence[];
-  defaultSortField: string;
-  Header: (...args) => any[];
-  hideLabelFilter?: boolean;
-  kindPlural: string;
-  labelFilter?: string;
-  labelPath?: string;
-  loaded: boolean;
-  loadError?: any;
-  nameFilterID: string;
-  reduxID: string;
-  Row: React.FC<RowFunctionArgs>;
-  rowFilters: RowFilter[];
-  showTitle?: boolean;
-  TopAlert?: React.ReactNode
-};
-
 export type Target = {
   discoveredLabels: PrometheusLabels;
   globalUrl: string;
@@ -96,5 +74,6 @@ export type Target = {
 };
 
 export type RootState = {
+  k8s: { [key: string]: any };
   observe: ObserveState;
 };

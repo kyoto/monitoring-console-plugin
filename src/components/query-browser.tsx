@@ -16,24 +16,25 @@ import {
   ChartLegend,
   ChartLine,
   ChartStack,
-  ChartThemeColor,
-  ChartThemeVariant,
   ChartVoronoiContainer,
-  getCustomTheme,
 } from '@patternfly/react-charts';
 import {
   Alert,
   Button,
   Checkbox,
+  Dropdown,
+  DropdownItem,
+  DropdownPosition,
+  DropdownToggle,
   EmptyState,
   EmptyStateBody,
   EmptyStateIcon,
   EmptyStateVariant,
+  InputGroup,
   TextInput,
   Title,
 } from '@patternfly/react-core';
 import { ChartLineIcon } from '@patternfly/react-icons';
-import { global_palette_black_300 } from '@patternfly/react-tokens/dist/js/global_palette_black_300';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { VictoryPortal } from 'victory-core';
@@ -43,8 +44,6 @@ import {
   queryBrowserPatchQuery,
   queryBrowserSetTimespan,
 } from '../actions/observe';
-import { formatNumber } from './format';
-import { PrometheusAPIError, RootState } from './types';
 
 import { withFallback } from './console/console-shared/error/error-boundary';
 import { GraphEmpty } from './console/graphs/graph-empty';
@@ -57,71 +56,19 @@ import {
   timeFormatter,
   timeFormatterWithSeconds,
 } from './console/utils/datetime';
-import { Dropdown } from './console/utils/dropdown';
 import { usePoll } from './console/utils/poll-hook';
 import { useRefWidth } from './console/utils/ref-width-hook';
 import { useSafeFetch } from './console/utils/safe-fetch-hook';
 import { LoadingInline } from './console/utils/status-box';
 import { humanizeNumberSI } from './console/utils/units';
 
-const ONE_MINUTE = 60 * 1000;
+import { formatNumber } from './format';
+import { useBoolean } from './hooks/useBoolean';
+import { queryBrowserTheme } from './query-browser-theme';
+import { PrometheusAPIError, RootState } from './types';
 
 const spans = ['5m', '15m', '30m', '1h', '2h', '6h', '12h', '1d', '2d', '1w', '2w'];
-const dropdownItems = _.zipObject(spans, spans);
-
-const pfDependentAxisTickLabels = {
-  padding: 5,
-  fontFamily: 'var(--pf-chart-global--FontFamily)',
-  letterSpacing: 'var(--pf-chart-global--letter-spacing)',
-  fill: 'var(--pf-global--Color--200)',
-};
-const queryBrowserTheme = {
-  chart: {
-    padding: {
-      bottom: 0,
-      left: 0,
-      right: 0,
-      top: 0,
-    },
-  },
-  dependentAxis: {
-    style: {
-      axis: {
-        stroke: 'none',
-      },
-      grid: {
-        stroke: '#EDEDED',
-      },
-      tickLabels: pfDependentAxisTickLabels,
-    },
-  },
-  independentAxis: {
-    style: {
-      ticks: {
-        size: 5,
-        strokeWidth: 1,
-        stroke: global_palette_black_300.value,
-      },
-      tickLabels: Object.assign({}, pfDependentAxisTickLabels, { padding: 2 }),
-      grid: {
-        stroke: 'none',
-      },
-    },
-  },
-  line: {
-    style: {
-      data: {
-        opacity: 0.75,
-      },
-    },
-  },
-};
-const theme = getCustomTheme(
-  ChartThemeColor.multiUnordered,
-  ChartThemeVariant.light,
-  queryBrowserTheme,
-);
-export const colors = theme.line.colorScale;
+export const colors = queryBrowserTheme.line.colorScale;
 
 // Use exponential notation for small or very large numbers to avoid labels with too many characters
 const formatPositiveValue = (v: number): string =>
@@ -159,6 +106,8 @@ const SpanControls: React.FC<SpanControlsProps> = React.memo(
 
     const { t } = useTranslation();
 
+    const [isOpen, setIsOpen, , setClosed] = useBoolean(false);
+
     React.useEffect(() => {
       setText(formatPrometheusDuration(span));
     }, [span]);
@@ -176,24 +125,35 @@ const SpanControls: React.FC<SpanControlsProps> = React.memo(
       }
     };
 
+    const dropdownItems = spans.map((s) => (
+      <DropdownItem
+        className="query-browser__span-dropdown-item"
+        key={s}
+        onClick={() => setSpan(s, true)}
+      >
+        {s}
+      </DropdownItem>
+    ));
+
     return (
       <>
-        <TextInput
-          aria-label={t('public~graph timespan')}
-          className="query-browser__span-text"
-          validated={isValid ? 'default' : 'error'}
-          onChange={(v) => setSpan(v, true)}
-          type="text"
-          value={text}
-        />
-        <Dropdown
-          ariaLabel={t('public~graph timespan')}
-          buttonClassName="dropdown-button--icon-only"
-          items={dropdownItems}
-          menuClassName="query-browser__span-dropdown-menu"
-          noSelection={true}
-          onChange={(v: string) => setSpan(v)}
-        />
+        <InputGroup className="query-browser__span">
+          <TextInput
+            aria-label={t('public~graph timespan')}
+            className="query-browser__span-text"
+            validated={isValid ? 'default' : 'error'}
+            onChange={(v) => setSpan(v, true)}
+            type="text"
+            value={text}
+          />
+          <Dropdown
+            dropdownItems={dropdownItems}
+            isOpen={isOpen}
+            onSelect={setClosed}
+            position={DropdownPosition.right}
+            toggle={<DropdownToggle aria-label={t('public~graph timespan')} onToggle={setIsOpen} />}
+          />
+        </InputGroup>
         <Button
           className="query-browser__inline-control"
           onClick={() => setSpan(defaultSpanText)}
@@ -370,6 +330,8 @@ type GraphSeries = GraphDataPoint[] | null;
 
 const getXDomain = (endTime: number, span: number): AxisDomain => [endTime - span, endTime];
 
+const ONE_MINUTE = 60 * 1000;
+
 const Graph: React.FC<GraphProps> = React.memo(
   ({
     allSeries,
@@ -411,7 +373,7 @@ const Graph: React.FC<GraphProps> = React.memo(
       });
     });
 
-    if (data.every(_.isEmpty)) {
+    if (!data.some(Array.isArray)) {
       return <GraphEmpty />;
     }
 
@@ -423,16 +385,16 @@ const Graph: React.FC<GraphProps> = React.memo(
         _.every(series, ([, values]) => _.every(values, { y: 0 })),
       );
       if (isAllZero) {
-        domain.y = [-1, 1];
+        domain.y = [0, 1];
       }
     } else {
       // Set a reasonable Y-axis range based on the min and max values in the data
-      const findMin = (series: GraphSeries) => _.minBy(series, 'y');
-      const findMax = (series: GraphSeries) => _.maxBy(series, 'y');
-      let minY: number = findMin((data as GraphSeries[]).map(findMin))?.y ?? 0;
-      let maxY: number = findMax((data as GraphSeries[]).map(findMax))?.y ?? 0;
+      const findMin = (series: GraphSeries): GraphDataPoint => _.minBy(series, 'y');
+      const findMax = (series: GraphSeries): GraphDataPoint => _.maxBy(series, 'y');
+      let minY: number = findMin(data.map(findMin))?.y ?? 0;
+      let maxY: number = findMax(data.map(findMax))?.y ?? 0;
       if (minY === 0 && maxY === 0) {
-        minY = -1;
+        minY = 0;
         maxY = 1;
       } else if (minY > 0 && maxY > 0) {
         minY = 0;
@@ -471,7 +433,7 @@ const Graph: React.FC<GraphProps> = React.memo(
         domainPadding={{ y: 1 }}
         height={200}
         scale={{ x: 'time', y: 'linear' }}
-        theme={theme}
+        theme={queryBrowserTheme}
         width={width}
       >
         <ChartAxis tickCount={xAxisTickCount} tickFormat={xAxisTickFormat} />
@@ -483,7 +445,7 @@ const Graph: React.FC<GraphProps> = React.memo(
           tickFormat={yTickFormat}
         />
         <GroupComponent>
-          {(data as GraphSeries[]).map((values, i) => {
+          {data.map((values, i) => {
             if (values === null) {
               return null;
             }
@@ -816,15 +778,12 @@ const QueryBrowser_: React.FC<QueryBrowserProps> = ({
           setSamples(newSamples);
         } else {
           const newGraphData = _.map(newResults, (result: PrometheusResult[]) => {
-            return _.map(
-              result,
-              ({ metric, values }): Series => {
-                // If filterLabels is specified, ignore all series that don't match
-                return _.some(filterLabels, (v, k) => _.has(metric, k) && metric[k] !== v)
-                  ? []
-                  : [metric, formatSeriesValues(values, samples, span)];
-              },
-            );
+            return _.map(result, ({ metric, values }): Series => {
+              // If filterLabels is specified, ignore all series that don't match
+              return _.some(filterLabels, (v, k) => _.has(metric, k) && metric[k] !== v)
+                ? []
+                : [metric, formatSeriesValues(values, samples, span)];
+            });
           });
           setGraphData(newGraphData);
 

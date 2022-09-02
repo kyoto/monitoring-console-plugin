@@ -21,13 +21,16 @@
     "@codemirror/search": "^6.0.0",
     "@codemirror/state": "^6.1.0",
     "@codemirror/view": "^6.0.3",
-    "@openshift-console/dynamic-plugin-sdk": "^0.0.11",
-    "@openshift-console/dynamic-plugin-sdk-webpack": "^0.0.7",
+    "@openshift-console/dynamic-plugin-sdk": "^0.0.17",
+    "@openshift-console/dynamic-plugin-sdk-internal": "^0.0.11",
+    "@openshift-console/dynamic-plugin-sdk-webpack": "^0.0.8",
+    "@openshift-console/plugin-shared": "^0.0.1",
     "@patternfly/react-charts": "6.77.1",
     "@patternfly/react-core": "4.224.1",
     "@patternfly/react-table": "4.93.1",
     "@prometheus-io/codemirror-promql": "^0.37.0",
     "classnames": "2.x",
+    "fuzzysearch": "1.0.x",
     "i18next": "^19.8.3",
     "immutable": "3.x",
     "lodash-es": "^4.17.21",
@@ -36,6 +39,7 @@
     "react-dom": "^17.0.1",
     "react-helmet": "^6.1.0",
     "react-i18next": "^11.8.11",
+    "react-linkify": "^0.2.2",
     "react-modal": "^3.12.1",
     "react-redux": "7.2.2",
     "react-router": "5.2.0",
@@ -71,8 +75,7 @@
     "displayName": "OpenShift Monitoring Console Plugin",
     "description": "This plugin adds the monitoring UI to OpenShift console",
     "exposedModules": {
-      "QueryBrowserPage": "./components/metrics",
-      "DashboardsPage": "./components/dashboards"
+      "MonitoringUI": "./components/alerting"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

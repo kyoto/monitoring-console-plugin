@@ -35,15 +35,16 @@ import {
   PrometheusEndpoint,
   YellowExclamationTriangleIcon,
 } from '@openshift-console/dynamic-plugin-sdk';
+import { Button } from '@patternfly/react-core';
+import { CloseIcon } from '@patternfly/react-icons';
 import { PromQLExtension } from '@prometheus-io/codemirror-promql';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import './_promql-expression-input.scss';
+import { useSafeFetch } from './console/utils/safe-fetch-hook';
 
 import { PROMETHEUS_BASE_PATH } from './utils';
-import CloseButton from './console/console-shared/close-button/CloseButton';
-import { useSafeFetch } from './console/utils/safe-fetch-hook';
+import './_promql-expression-input.scss';
 
 type InteractionTarget = {
   focus: () => void;
@@ -180,8 +181,8 @@ export const theme = EditorView.theme({
 // Codemirror plugin to select an autosuggest option using the mouse
 export const selectAutocompleteOnHoverPlugin = ViewPlugin.fromClass(
   class SelectAutocompleteOnHoverPlugin {
-    optionsLength: number = 0;
-    lastIndex: number = -1;
+    optionsLength = 0;
+    lastIndex = -1;
 
     constructor(readonly view: EditorView) {
       this.view.dom.addEventListener('mousemove', (this.onMouseMove = this.onMouseMove.bind(this)));
@@ -420,11 +421,14 @@ export const PromQLExpressionInput: React.FC<PromQLExpressionInputProps> = ({
           </div>
         </div>
       )}
-      <CloseButton
-        additionalClassName="query-browser__clear-icon"
-        ariaLabel={t('public~Clear query')}
+      <Button
+        aria-label={t('public~Clear query')}
+        className="query-browser__clear-icon"
         onClick={onClear}
-      />
+        variant="plain"
+      >
+        <CloseIcon />
+      </Button>
     </div>
   );
 };
