@@ -11,7 +11,8 @@ declare interface Window {
   };
 }
 
-// TODO: Remove when upgrading to TypeScript 4.1.2+, which has a type for ListFormat and RelativeTimeFormat.
+// TODO: Remove when upgrading to TypeScript 4.1.2+, which has a type for ListFormat and
+//       RelativeTimeFormat.
 declare namespace Intl {
   class ListFormat {
     constructor(locales?: Locale | string | undefined, options?: Partial<ListFormatOptions>);

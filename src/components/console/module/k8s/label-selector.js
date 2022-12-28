@@ -18,8 +18,8 @@ export class LabelSelector {
     this._conjuncts = {};
     this._emptySelectsAll = !!emptySelectsAll;
     // expects the JSON format as returned by k8s API
-    // Supports both the old selector syntax of just key: value pairs like on RCs
-    // as well as the new matchLabel and matchExpression syntax on newer controllers like ReplicaSets
+    // Supports both the old selector syntax of just key: value pairs like on RCs as well as the new
+    // matchLabel and matchExpression syntax on newer controllers like ReplicaSets
     // For now it will also handle key: null as key exists for backwards compatibility from before
     // the matchExpression support was added.
     this._OPERATOR_MAP = {

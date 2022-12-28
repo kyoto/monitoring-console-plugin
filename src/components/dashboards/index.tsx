@@ -297,7 +297,10 @@ const VariableDropdown: React.FC<VariableDropdownProps> = ({ id, name, namespace
       {isError ? (
         <Select
           isDisabled={true}
-          onToggle={() => {}}
+          onToggle={
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            () => {}
+          }
           placeholderText={
             <>
               <RedExclamationCircleIcon /> {t('public~Error loading options')}

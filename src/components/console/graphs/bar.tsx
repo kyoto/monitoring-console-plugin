@@ -62,7 +62,8 @@ const BarChart: React.FC<BarChartProps> = ({
 }) => {
   const [containerRef, width] = useRefWidth();
 
-  // Max space that horizontal padding should take up. By default, 2/3 of the horizontal space is always available for the actual bar graph.
+  // Max space that horizontal padding should take up. By default, 2/3 of the horizontal space is
+  // always available for the actual bar graph.
   const maxHorizontalPadding = PADDING_RATIO * width;
 
   const padding = {
