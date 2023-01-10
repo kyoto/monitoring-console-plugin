@@ -4,7 +4,9 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
+// TODO: These will be available in future versions of the plugin SDK
 import { formatPrometheusDuration, parsePrometheusDuration } from '../console/utils/datetime';
+
 import { getQueryArgument, removeQueryArgument, setQueryArgument } from '../console/utils/router';
 
 import { dashboardsSetEndTime, dashboardsSetTimespan } from '../../actions/observe';

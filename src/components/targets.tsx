@@ -28,7 +28,13 @@ import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
 import { Link, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 
-import { NamespaceModel, PodModel, PodMonitorModel, ServiceModel, ServiceMonitorModel } from './console/models';
+import {
+  NamespaceModel,
+  PodModel,
+  PodMonitorModel,
+  ServiceModel,
+  ServiceMonitorModel,
+} from './console/models';
 import { LabelSelector } from './console/module/k8s/label-selector';
 import { referenceForModel } from './console/module/k8s/k8s-ref';
 import { K8sResourceKind } from './console/module/k8s/types';
@@ -56,9 +62,8 @@ const PodsWatchContext = React.createContext([]);
 const PodMonitor: React.FC<{ target: Target }> = ({ target }) => {
   const { t } = useTranslation();
 
-  const [podMonitors, podMonitorsLoaded, podMonitorsLoadError] = React.useContext(
-    PodMonitorsWatchContext,
-  );
+  const [podMonitors, podMonitorsLoaded, podMonitorsLoadError] =
+    React.useContext(PodMonitorsWatchContext);
   const [pods, podsLoaded] = React.useContext(PodsWatchContext);
 
   if (podMonitorsLoadError) {
@@ -204,7 +209,7 @@ type DetailsProps = RouteComponentProps<{ scrapeUrl?: string }> & {
 const Details_: React.FC<DetailsProps> = ({ loaded, loadError, match, targets }) => {
   const { t } = useTranslation();
 
-  let scrapeUrl: string = '';
+  let scrapeUrl = '';
   let target: Target | undefined;
   if (match?.params?.scrapeUrl) {
     try {
@@ -314,7 +319,6 @@ const Details_: React.FC<DetailsProps> = ({ loaded, loadError, match, targets })
   );
 };
 const Details = withRouter(Details_);
-
 
 const tableClasses = [
   'pf-u-w-25-on-md', // Endpoint

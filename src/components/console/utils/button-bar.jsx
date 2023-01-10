@@ -1,6 +1,5 @@
 import * as _ from 'lodash-es';
 import * as React from 'react';
-import * as classNames from 'classnames';
 import * as PropTypes from 'prop-types';
 import { Alert, AlertGroup } from '@patternfly/react-core';
 import { useTranslation } from 'react-i18next';

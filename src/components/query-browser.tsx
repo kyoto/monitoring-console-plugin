@@ -51,10 +51,12 @@ import { getPrometheusURL } from './console/graphs/helpers';
 import {
   dateFormatterNoYear,
   dateTimeFormatterWithSeconds,
-  formatPrometheusDuration,
-  parsePrometheusDuration,
   timeFormatter,
   timeFormatterWithSeconds,
+
+  // TODO: These will be available in future versions of the plugin SDK
+  formatPrometheusDuration,
+  parsePrometheusDuration,
 } from './console/utils/datetime';
 import { usePoll } from './console/utils/poll-hook';
 import { useRefWidth } from './console/utils/ref-width-hook';

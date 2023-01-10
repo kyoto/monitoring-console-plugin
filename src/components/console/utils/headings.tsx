@@ -8,5 +8,7 @@ export const PageHeading: React.FC<{ helpText: string; title: string }> = ({ hel
 );
 
 export const SectionHeading: React.FC<{ text: string }> = ({ text }) => (
-  <h2 className="co-section-heading" data-test-section-heading={text}>{text}</h2>
+  <h2 className="co-section-heading" data-test-section-heading={text}>
+    {text}
+  </h2>
 );

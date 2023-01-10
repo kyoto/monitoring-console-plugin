@@ -5,6 +5,7 @@ import { Dropdown, DropdownToggle, DropdownItem } from '@patternfly/react-core';
 
 import { useBoolean } from './hooks/useBoolean';
 
+// TODO: These will be available in future versions of the plugin SDK
 import { formatPrometheusDuration, parsePrometheusDuration } from './console/utils/datetime';
 
 const OFF_KEY = 'OFF_KEY';

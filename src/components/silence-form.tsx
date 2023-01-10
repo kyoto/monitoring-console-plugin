@@ -18,12 +18,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
-// TODO: These will be available in future versions of the SDK
+// TODO: These will be available in future versions of the plugin SDK
 const getUser = (state) => state.sdkCore.user;
+import { formatPrometheusDuration, parsePrometheusDuration } from './console/utils/datetime';
 
 import { withFallback } from './console/console-shared/error/error-boundary';
 import { ButtonBar } from './console/utils/button-bar';
-import { formatPrometheusDuration, parsePrometheusDuration } from './console/utils/datetime';
 import { PageHeading, SectionHeading } from './console/utils/headings';
 import { ExternalLink } from './console/utils/link';
 import { getAllQueryArguments } from './console/utils/router';
@@ -213,6 +213,7 @@ const SilenceForm_: React.FC<SilenceFormProps> = ({ defaults, history, Info, tit
       .post(`${alertManagerBaseURL}/api/v2/silences`, body)
       .then(({ silenceID }) => {
         setError(undefined);
+        // TODO refreshNotificationPollers();
         history.push(`${SilenceResource.plural}/${encodeURIComponent(silenceID)}`);
       })
       .catch((err) => {

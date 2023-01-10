@@ -66,7 +66,8 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, Redirect, Route, RouteComponentProps, Switch, withRouter } from 'react-router-dom';
 
-// Already in SDK, but not yet released
+// TODO: These will be available in future versions of the plugin SDK
+import { formatPrometheusDuration } from './console/utils/datetime';
 import { useActiveNamespace } from './console/console-shared/hooks/useActiveNamespace';
 
 import { withFallback } from './console/console-shared/error/error-boundary';
@@ -81,7 +82,6 @@ import {
   PodModel,
   StatefulSetModel,
 } from './console/models';
-import { formatPrometheusDuration } from './console/utils/datetime';
 import { SectionHeading } from './console/utils/headings';
 import { ExternalLink, LinkifyExternal } from './console/utils/link';
 import { getAllQueryArguments } from './console/utils/router';
@@ -669,7 +669,7 @@ const SilencedByList: React.FC<{ silences: Silence[] }> = ({ silences }) => {
   );
 };
 
-type AlertsDetailsPageProps = RouteComponentProps<{ ns?: string, ruleID: string }>;
+type AlertsDetailsPageProps = RouteComponentProps<{ ns?: string; ruleID: string }>;
 
 const AlertsDetailsPage_: React.FC<AlertsDetailsPageProps> = ({ history, match }) => {
   const { t } = useTranslation();
@@ -2036,7 +2036,7 @@ const Tab: React.FC<{ active: boolean; children: React.ReactNode }> = ({ active,
   </li>
 );
 
-const AlertingPage: React.FC<RouteComponentProps<{ url: string}>> = ({ match }) => {
+const AlertingPage: React.FC<RouteComponentProps<{ url: string }>> = ({ match }) => {
   const { t } = useTranslation();
 
   const alertsPath = '/monitoring/alerts';
